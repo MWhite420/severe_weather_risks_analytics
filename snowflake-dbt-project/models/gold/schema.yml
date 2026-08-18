@@ -1,0 +1,92 @@
+version: 2
+
+# =========================================================
+# GOLD LAYER - models/gold
+# ---------------------------------------------------------
+# gold_storm_events = Power BI-ready mart, one row per event.
+# Materializes as GOLD.GOLD_STORM_EVENTS (table).
+# =========================================================
+
+models:
+  - name: gold_storm_events
+    description: "Gold mart table - one row per storm event, Power BI-ready types. Answers all 10 dashboard questions."
+    config:
+      materialized: table
+      schema: gold
+    columns:
+      - name: event_id
+        description: "Unique storm event identifier (primary key)."
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('silver_storm_events')
+              field: event_id
+      - name: state
+        description: "State or marine zone full name (e.g. 'ALABAMA')."
+        tests:
+          - not_null
+      - name: state_type
+        description: "'STATE' for real US states/territories, 'MARINE' for offshore zones (not map-able in Power BI)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['STATE', 'MARINE']
+      - name: year
+        description: "Calendar year of the event (2022-2025)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [2022, 2023, 2024, 2025]
+      - name: month
+        description: "Month of the event (1-12)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: month_name
+        description: "Month display name (e.g. 'January')."
+        tests:
+          - not_null
+      - name: event_type
+        description: "NOAA storm event type (e.g. 'Thunderstorm Wind')."
+        tests:
+          - not_null
+      - name: cz_name
+        description: "County/zone name."
+      - name: cz_fips
+        description: "County/zone FIPS code."
+      - name: wfo
+        description: "Weather forecast office."
+      - name: begin_datetime
+        description: "Event start timestamp."
+        tests:
+          - not_null
+      - name: end_datetime
+        description: "Event end timestamp."
+      - name: injuries_total
+        description: "Total injuries (direct + indirect)."
+      - name: deaths_total
+        description: "Total deaths (direct + indirect)."
+      - name: damage_property_usd
+        description: "Property damage in USD (K/M/B parsed)."
+      - name: damage_crops_usd
+        description: "Crop damage in USD (K/M/B parsed)."
+      - name: financial_impact_usd
+        description: "Property + crop damage in USD."
+      - name: event_count
+        description: "Always 1 (event grain, for COUNT/SUM aggregation)."
+      - name: severity_risk_score
+        description: "Composite risk = $ damage + $100k/injury + $1M/death."
+      - name: is_tornado
+        description: "True when event_type = 'Tornado'."
+        tests:
+          - not_null
+      - name: is_flood
+        description: "True for flood-family event types."
+        tests:
+          - not_null
+      - name: is_test_event
+        description: "True when EVENT_ID starts with '999' (test rows)."
+        tests:
+          - not_null

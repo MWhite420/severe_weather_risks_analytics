@@ -1,0 +1,25 @@
+version: 2
+
+# =========================================================
+# BRONZE LAYER — raw sources
+# ---------------------------------------------------------
+# These are the raw NOAA Storm Events tables loaded directly
+# from the staged CSVs (one per year), stored in DBT_DB.RAW.
+# Bronze = immutable raw source-of-truth. No transformation.
+# Silver models will reference these via {{ source(...) }}.
+# =========================================================
+
+sources:
+  - name: raw_storm
+    database: DBT_DB
+    schema: RAW
+    description: "Raw NOAA Storm Events data, loaded from staged CSVs (one table per year)."
+    tables:
+      - name: STORM_EVENTS_2022
+        description: "Raw 2022 storm events (all VARCHAR, from CSV)."
+      - name: STORM_EVENTS_2023
+        description: "Raw 2023 storm events (all VARCHAR, from CSV)."
+      - name: STORM_EVENTS_2024
+        description: "Raw 2024 storm events (all VARCHAR, from CSV)."
+      - name: STORM_EVENTS_2025
+        description: "Raw 2025 storm events (all VARCHAR, from CSV)."

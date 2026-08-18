@@ -1,0 +1,80 @@
+version: 2
+
+# =========================================================
+# SILVER LAYER - models/silver
+# ---------------------------------------------------------
+#  silver_storm_events = union of the 4 bronze year views,
+# cleaned and typed. EVENT_ID is the primary key.
+# Materializes as SILVER.STORM_EVENTS (table).
+# =========================================================
+
+models:
+  - name: silver_storm_events
+    description: "Silver table - clean, typed union of all 4 years of storm events (one row per event)."
+    config:
+      materialized: table
+      schema: silver
+    columns:
+      - name: event_id
+        description: "Unique storm event identifier (primary key)."
+        tests:
+          - not_null
+          - unique
+      - name: episode_id
+        description: "Episode identifier grouping related events."
+      - name: state
+        description: "State or marine zone name (e.g. 'ALABAMA', 'GULF OF MEXICO')."
+        tests:
+          - not_null
+      - name: year
+        description: "Calendar year of the event (from the YEAR column)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [2022, 2023, 2024, 2025]
+      - name: event_type
+        description: "NOAA storm event type (e.g. 'Thunderstorm Wind', 'Hail')."
+        tests:
+          - not_null
+      - name: cz_fips
+        description: "County/zone FIPS code."
+      - name: cz_name
+        description: "County/zone name."
+      - name: wfo
+        description: "Weather forecast office."
+      - name: begin_date_time
+        description: "Event start timestamp (parsed from BEGIN_DATE_TIME)."
+      - name: end_date_time
+        description: "Event end timestamp (parsed from END_DATE_TIME)."
+      - name: cz_timezone
+        description: "Local timezone of the event."
+      - name: injuries_direct
+        description: "Direct injuries (integer)."
+      - name: injuries_indirect
+        description: "Indirect injuries (integer)."
+      - name: deaths_direct
+        description: "Direct deaths (integer)."
+      - name: deaths_indirect
+        description: "Indirect deaths (integer)."
+      - name: damage_property_usd
+        description: "Property damage in USD (parsed from DAMAGE_PROPERTY K/M/B tokens)."
+      - name: damage_crops_usd
+        description: "Crop damage in USD (parsed from DAMAGE_CROPS K/M/B tokens)."
+      - name: source
+        description: "Event report source."
+      - name: begin_lat
+        description: "Start latitude (numeric)."
+      - name: begin_lon
+        description: "Start longitude (numeric)."
+      - name: end_lat
+        description: "End latitude (numeric)."
+      - name: end_lon
+        description: "End longitude (numeric)."
+      - name: episode_narrative
+        description: "Free-text episode narrative."
+      - name: event_narrative
+        description: "Free-text event narrative."
+      - name: is_test_event
+        description: "True when EVENT_ID starts with '999' (test/placeholder rows)."
+        tests:
+          - not_null
