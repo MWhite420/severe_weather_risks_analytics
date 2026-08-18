@@ -1,0 +1,20 @@
+1. Open Power BI for windows
+2. Get Snowflake ODBC driver (64-bit) for Power BI's native Snowflake connector requires it. Grab it from https://developers.snowflake.com/odbc/, install, restart Power BI afterwards.
+
+Connection details (these are my credentials, you can also use yours if you want)
+
+• Server: ieygdkm-tf08540.snowflakecomputing.com
+• Warehouse: COMPUTE_WH
+• Role: ACCOUNTADMIN (leave default if the field is optional)
+• Auth: Username / Password
+• Username: demoman12568
+• Password: .\[]MRj)L;]f%*9:XS
+
+Steps in Power BI Desktop
+
+1. Home → Get Data → More… → search Snowflake → double-click Snowflake → Connect
+2. Paste the Server and Warehouse from above → OK
+3. Sign in window: choose Username/Password → enter credentials → Connect
+4. Navigator opens — expand:
+DBT_DB → GOLD → check GOLD_STORM_EVENTS → Load
+(Ignore everything else you only need the gold table.)
