@@ -15,41 +15,42 @@
 --
 -- Rules: real SQL NULL only (no text 'NULL' / empty strings in
 -- numerics/dates); money as plain decimals (Power BI formats $).
+--
+-- FILTER: only the 50 real US states are kept. US territories
+-- (Puerto Rico, Guam, American Samoa, US Virgin Islands, DC) and
+-- all 13 marine/offshore zones are EXCLUDED.
 -- =========================================================
 
 WITH silver AS (
     SELECT * FROM {{ ref('silver_storm_events') }}
 ),
 
--- 13 marine/offshore zones (validated live: 10,954 rows, 3.8%)
--- These are NOT map-able to a US state in Power BI.
-marine_zones AS (
-    SELECT column1 AS zone_name FROM VALUES
-        ('ATLANTIC NORTH'),
-        ('ATLANTIC SOUTH'),
-        ('E PACIFIC'),
-        ('GUAM WATERS'),
-        ('GULF OF ALASKA'),
-        ('GULF OF MEXICO'),
-        ('LAKE ERIE'),
-        ('LAKE HURON'),
-        ('LAKE MICHIGAN'),
-        ('LAKE ONTARIO'),
-        ('LAKE ST CLAIR'),
-        ('LAKE SUPERIOR'),
-        ('ST LAWRENCE R')
+-- Only the 50 real US states qualify. Territories and marine zones
+-- are excluded (see WHERE).
+us_states AS (
+    SELECT column1 AS state_name FROM VALUES
+        ('ALABAMA'), ('ALASKA'), ('ARIZONA'), ('ARKANSAS'), ('CALIFORNIA'),
+        ('COLORADO'), ('CONNECTICUT'), ('DELAWARE'), ('FLORIDA'), ('GEORGIA'),
+        ('HAWAII'), ('IDAHO'), ('ILLINOIS'), ('INDIANA'), ('IOWA'),
+        ('KANSAS'), ('KENTUCKY'), ('LOUISIANA'), ('MAINE'), ('MARYLAND'),
+        ('MASSACHUSETTS'), ('MICHIGAN'), ('MINNESOTA'), ('MISSISSIPPI'), ('MISSOURI'),
+        ('MONTANA'), ('NEBRASKA'), ('NEVADA'), ('NEW HAMPSHIRE'), ('NEW JERSEY'),
+        ('NEW MEXICO'), ('NEW YORK'), ('NORTH CAROLINA'), ('NORTH DAKOTA'), ('OHIO'),
+        ('OKLAHOMA'), ('OREGON'), ('PENNSYLVANIA'), ('RHODE ISLAND'), ('SOUTH CAROLINA'),
+        ('SOUTH DAKOTA'), ('TENNESSEE'), ('TEXAS'), ('UTAH'), ('VERMONT'),
+        ('VIRGINIA'), ('WASHINGTON'), ('WEST VIRGINIA'), ('WISCONSIN'), ('WYOMING')
 )
 
 SELECT
     -- identity / grain
     s.event_id,
 
-    -- dimensions
+    -- dimensions (always a real US state now)
     s.state,
-    CASE WHEN mz.zone_name IS NOT NULL THEN 'MARINE' ELSE 'STATE' END AS state_type,
+    'STATE' AS state_type,
     s.year,
     MONTH(s.begin_date_time)                               AS month,
-    TO_CHAR(s.begin_date_time, 'FMMonth')                  AS month_name,
+    TO_CHAR(s.begin_date_time, 'MMMM')                     AS month_name,
     s.event_type,
     s.cz_name,
     s.cz_fips,
@@ -85,4 +86,4 @@ SELECT
     s.is_test_event
 
 FROM silver s
-LEFT JOIN marine_zones mz ON mz.zone_name = s.state
+JOIN us_states st ON st.state_name = s.state
